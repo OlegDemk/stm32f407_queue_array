@@ -92,7 +92,17 @@ void print_text(char * text)
 	HAL_Delay(10);
 }
 // ------------------------------------------------------------------------------------------------
+#ifdef __GNUC__
+#define PUTCHAR_PROTOTYPE int __io_putchar(int ch)
+#else
+#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+#endif
 
+PUTCHAR_PROTOTYPE
+{
+  HAL_UART_Transmit(&huart3, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
+  return ch;
+}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -152,9 +162,6 @@ int main(void)
   tm_ms_tick = HAL_GetTick();
   sw = sw_old = HAL_GPIO_ReadPin(GPIOA, user_button_Pin);
 
-  Залити на репозиторій цей проект
-  Зробити пулл з минулим проектом
-  знайти аналог printf для UART
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -174,48 +181,17 @@ int main(void)
 		  {
 			  if (sw)
 			  {
-				  print_text("User button Pressed\n\r");
-				  //printf("UART3 Queue IsEmpty() = %d\r\n",IsEmpty(&rx_Int_queue));
-				  char uart_buf[50] = {0};
-				  memset(uart_buf, 0, sizeof(uart_buf));
-				  strcpy(uart_buf, "UART3 Queue IsEmpty() = ");
-				  int isempty = IsEmpty(&rx_Int_queue);
-				  char str_int[5] = {0};
-				  sprintf(str_int, "%d", isempty);
-				  strcat(uart_buf, str_int);
-				  strcat(uart_buf, "\n\r");
-				  HAL_UART_Transmit_IT(&huart3, uart_buf, sizeof(uart_buf));
-				  HAL_Delay(10);
-
-
+				  printf("User button Pressed\n\r");
+				  printf("UART3 Queue IsEmpty() = %d\r\n",IsEmpty(&rx_Int_queue));
 				  cnt_rcv = len_queue(&rx_Int_queue);
-				  memset(str_int, 0, sizeof(str_int));
-				  memset(uart_buf, 0, sizeof(uart_buf));
-				  sprintf(str_int, "%d", cnt_rcv);
-				  strcpy(uart_buf, "UART3 recieved data num = ");
+				  printf("UART3 recieved data num = %d\r\n",cnt_rcv);
+				  printf("Recieved data = ");
 
-				  strcat(uart_buf, str_int);
-				  strcat(uart_buf, "\n\r");
-				  HAL_UART_Transmit_IT(&huart3, uart_buf, sizeof(uart_buf));
-				  HAL_Delay(10);
-
-
-				  //printf("UART3 recieved data num = %d\r\n",cnt_rcv);
-
-				  print_text("Recieved data = \n\r");
 				  for(i=0; i<cnt_rcv; i++)
 				  {
-					  memset(str_int, 0, sizeof(str_int));
-					  //memset(uart_buf, 0, sizeof(uart_buf));
-
-					  uint8_t res = Dequeue(&rx_Int_queue);
-					  sprintf(str_int, "%c", res);
-
-					  HAL_UART_Transmit_IT(&huart3, str_int, sizeof(str_int));
-					  HAL_Delay(10);
-					  // printf("%c",Dequeue(&rx_Int_queue));
+					  printf("%c",Dequeue(&rx_Int_queue));
 				  }
-				  print_text("\n\r");
+				  printf("\n\r");
 	  			}
 	  		}
 	  	}
